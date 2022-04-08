@@ -7,13 +7,6 @@ from ast import literal_eval
 # gosi url
 url = "https://www.gosi.kr/uat/uia/gosiMain.do"
 
-# env var
-path = './env.txt'
-f = open(path, 'r')
-line = f.readline()
-f.close()
-env_dict = literal_eval(line)
-
 
 # 각 리스트
 def get_news_ul(id):
@@ -102,4 +95,4 @@ async def on_message(message):
         for news in newsList:
             await channel.send(news)
 
-client.run(env_dict["discord_token"])
+client.run(process.env.TOKEN)
