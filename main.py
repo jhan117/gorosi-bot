@@ -119,4 +119,4 @@ async def news7(ctx):
         await ctx.message.delete(delay=3)
 
 
-bot.run("OTYxNTE1MDQ1NzIyOTMxMjYx.Yk6Gqg.fzdY-qL0B_imyiXp1n-7ems2ZTU")
+bot.run(os.environ['TOKEN'])
