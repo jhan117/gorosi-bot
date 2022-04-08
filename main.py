@@ -1,5 +1,7 @@
+from dis import disco
 import requests
 import discord
+from discord.ext import commands
 import os
 from bs4 import BeautifulSoup
 from ast import literal_eval
@@ -46,7 +48,7 @@ def get_new_news():
             infos = newImg[i].parent.find('a')
             newsList.append(dates[i].text + ' ' + infos.text)
     else:
-        newsList.append("새 글이 없습니다.")
+        newsList.append("새로운 글이 없습니다.")
 
     return newsList
 
@@ -66,34 +68,55 @@ def get_news7():
     return newsList
 
 
-client = discord.Client()
+bot = commands.Bot(command_prefix='!',
+                   activity=discord.Game(name="시켜서"))
 
 
-@ client.event
+@bot.event
 async def on_ready():
-    print(f'{client.user.name} has connected to Discord!')
+    print(f'{bot.user.name} has connected to Discord!')
 
 
-@ client.event
-async def on_message(message):
-    channel = client.get_channel(961515641699979285)
+@bot.command(name='청소')
+async def cleaner(ctx):
+    if str(ctx.channel) == 'gosi':
+        await ctx.channel.purge()
+    else:
+        await ctx.channel.send("여기 청소할 의무 없는데 제가 왜요?", delete_after=3)
+        await ctx.message.delete(delay=3)
 
-    if message.author == client.user:
-        return
 
-    if message.content.startswith('!공지'):
+@bot.command(name='공지')
+async def notice(ctx):
+    if str(ctx.channel) == 'gosi':
         newsList = get_news_notice()
         for news in newsList:
-            await channel.send(news)
+            await ctx.channel.send(news)
+    else:
+        await ctx.channel.send("채널 이름도 읽지 않는 사람에겐 알려주기 싫어요", delete_after=3)
+        await ctx.message.delete(delay=3)
 
-    if message.content.startswith('!새글'):
+
+@bot.command(name='새글')
+async def new(ctx):
+    if str(ctx.channel) == 'gosi':
         newsList = get_new_news()
         for news in newsList:
-            await channel.send(news)
+            await ctx.channel.send(news)
+    else:
+        await ctx.channel.send("채널 이름도 읽지 않는 사람에겐 알려주기 싫어요", delete_after=3)
+        await ctx.message.delete(delay=3)
 
-    if message.content.startswith('!7급'):
+
+@bot.command(name='7급')
+async def news7(ctx):
+    if str(ctx.channel) == 'gosi':
         newsList = get_news7()
         for news in newsList:
-            await channel.send(news)
+            await ctx.channel.send(news)
+    else:
+        await ctx.channel.send("채널 이름도 읽지 않는 사람에겐 알려주기 싫어요", delete_after=3)
+        await ctx.message.delete(delay=3)
 
-client.run(os.environ['TOKEN'])
+
+bot.run("OTYxNTE1MDQ1NzIyOTMxMjYx.Yk6Gqg.fzdY-qL0B_imyiXp1n-7ems2ZTU")
