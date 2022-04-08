@@ -1,5 +1,6 @@
 import requests
 import discord
+import os
 from bs4 import BeautifulSoup
 from ast import literal_eval
 
@@ -95,4 +96,4 @@ async def on_message(message):
         for news in newsList:
             await channel.send(news)
 
-client.run(process.env.TOKEN)
+client.run(os.environ['TOKEN'])
