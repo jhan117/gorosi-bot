@@ -47,10 +47,12 @@ def get_new_news():
     dates = ul.find_all(class_='date')
 
     newImg = ul.find_all('img')
-
-    for i in range(len(newImg)):
-        infos = newImg[i].parent.find('a')
-        newsList.append(dates[i].text + ' ' + infos.text)
+    if newImg:
+        for i in range(len(newImg)):
+            infos = newImg[i].parent.find('a')
+            newsList.append(dates[i].text + ' ' + infos.text)
+    else:
+        newsList.append("새 글이 없습니다.")
 
     return newsList
 
