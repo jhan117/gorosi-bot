@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 gosi_url = "https://www.gosi.kr/uat/uia/gosiMain.do"
 # 고시 채널
 gosi_channel = 961515641699979285
-# 0, 6, 12, 18시
-time_list = ["00:00:00", "06:00:00", "12:00:00", "18:00:00"]
+# 9, 12, 18시
+time_list = ["09:00:00", "12:00:00", "18:00:00"]
 
 
 # embed maker

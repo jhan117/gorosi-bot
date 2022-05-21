@@ -1,11 +1,12 @@
 import discord
 from discord.ext import commands, tasks
 import os
+
 from datetime import datetime
 import asyncio
 
-from gosi_fuc import *
-from weather_fuc import *
+from functions.gosi_fuc import *
+from functions.weather_fuc import *
 
 bot = commands.Bot(command_prefix='!',
                    activity=discord.Game(name="시켜서"))
@@ -31,22 +32,12 @@ async def on_ready():
             print("on_ready has error")
 
 
-# 새글 3시간마다 알림
-@tasks.loop(seconds=1)
-async def test():
-    if datetime.now().time().isoformat(timespec='seconds') in time_list:
-        get_new_post = get_new()
-
-        if get_new_post:
-            new_embed = make_embed(get_new_post)
-            await bot.get_channel(gosi_channel).send(embed=new_embed)
-
-
 @bot.command(name='청소')
 async def cleaner(ctx):
     await ctx.channel.purge()
 
 
+# === gosi 채널용 ===
 @bot.command(name='공지')
 async def notice(ctx):
     if str(ctx.channel) == 'gosi':
@@ -66,6 +57,17 @@ async def new(ctx):
             await ctx.channel.send('새로운 글이 없습니다')
 
 
+# 새글 3시간마다 알림 -> 코드 수정 해야 함
+@tasks.loop(seconds=1)
+async def test():
+    if datetime.now().time().isoformat(timespec='seconds') in time_list:
+        get_new_post = get_new()
+
+        if get_new_post:
+            new_embed = make_embed(get_new_post)
+            await bot.get_channel(gosi_channel).send(embed=new_embed)
+
+
 @bot.command(name='7급')
 async def news7(ctx, limit):
     if str(ctx.channel) == 'gosi':
@@ -75,14 +77,13 @@ async def news7(ctx, limit):
             await ctx.channel.send(embed=news7_embed)
 
 
-# === 기본 날씨 정보 ===
+# === weather 채널용 ===
 @bot.command(name='날씨')
 async def weather(ctx):
     if str(ctx.channel) == "weather":
         await ctx.channel.send(embed=make_weather_embed())
 
 
-# === 산책 날씨 정보 ===
 @bot.command(name='산책')
 async def walk_a_dog(ctx):
     if str(ctx.channel) == "weather":
@@ -100,7 +101,7 @@ async def walk_a_dog(ctx):
             await ctx.channel.send(wind_result)
 
 
-# === 10분 간격으로 재 요청 30분까지 ===
+# 예보 확인 후 기상이 안 좋을 것 같으면 알려줌
 @tasks.loop(seconds=1)
 async def forecast():
     if 115000 <= convert_int_time(datetime.now()) <= 163000:
