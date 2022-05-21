@@ -1,5 +1,7 @@
 # gosi-scraping
 
+heroku에서 24시간 구동중!
+
 ## 기능
 
 - 공무원 게시글 알림
