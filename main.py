@@ -87,14 +87,17 @@ async def weather(ctx):
 async def walk_a_dog(ctx):
     if str(ctx.channel) == "weather":
         weather_result = WalkADog().check_weather()
+        dust_result = WalkADog().check_dust()
+        wind_result = WalkADog().check_wind()
 
         if not weather_result:
             await ctx.channel.send(WalkADog().check_clothes())
         else:
             await ctx.channel.send(weather_result)
-
-        await ctx.channel.send(WalkADog().check_dust())
-        await ctx.channel.send(WalkADog().check_wind())
+        if dust_result:
+            await ctx.channel.send(dust_result)
+        if wind_result:
+            await ctx.channel.send(wind_result)
 
 
 # === 10분 간격으로 재 요청 30분까지 ===
