@@ -84,12 +84,13 @@ async def weather(ctx):
 @bot.command(name='산책')
 async def walk_a_dog(ctx):
     if str(ctx.channel) == "weather":
-        weather_result = WalkADog().check_weather()
-        dust_result = WalkADog().check_dust()
-        wind_result = WalkADog().check_wind()
+        walk = WalkADog()
+        weather_result = walk.check_weather()
+        dust_result = walk.check_dust()
+        wind_result = walk.check_wind()
 
         if not weather_result:
-            await ctx.channel.send(WalkADog().check_clothes())
+            await ctx.channel.send(walk.check_clothes())
         else:
             await ctx.channel.send(weather_result)
         if dust_result:
