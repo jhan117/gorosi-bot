@@ -12,6 +12,7 @@ class GetPost:
     def __init__(self):
         self.text = []
         self.date = []
+
         self.soup = BeautifulSoup(requests.get(gosi_url).text, "lxml")
 
         self.list_all = self.soup.select("#tab-content1 > li")

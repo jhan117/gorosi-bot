@@ -101,12 +101,14 @@ def make_weather_embed():
 def get_forecast():
     forecast_dict = {}
     forecast_message = ''
-    base_date = convert_to_int("date", datetime.now())
+    current = datetime.now()
 
-    if datetime.now().minute < 30:
-        base_time = str(datetime.now().hour - 1) + '30'
+    base_date = convert_to_int("date", current)
+
+    if current.minute < 30:
+        base_time = str(current.hour - 1) + '30'
     else:
-        base_time = str(convert_to_int("time", datetime.now()))[:-2]
+        base_time = str(convert_to_int("time", current))[:-2]
 
     forecast_params = {'serviceKey': forecast_key, 'numOfRows': '60', 'dataType': 'JSON',
                        'base_date': base_date, 'base_time': base_time, 'nx': forecast_nx, 'ny': forecast_ny}
