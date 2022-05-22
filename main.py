@@ -5,28 +5,41 @@ import os
 from datetime import datetime
 import asyncio
 
-from functions.gosi_fuc import *
-from functions.weather_fuc import *
+from common_func import *
+from gosi_func import *
+from weather_func import *
 
 bot = commands.Bot(command_prefix='!',
                    activity=discord.Game(name="시켜서"))
 
 
+# 9, 12, 18시
+time_list = ['090000', '120000', '180000']
+
+
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
-    test.start()
+    print("======")
 
     while True:
         try:
-            now_time = convert_int_time(datetime.now())
+            now_time = convert_to_int("time", datetime.now())
 
+            # 지정된 시간에 실행
             if forecast.is_running() == True:
                 if now_time > 123000:
                     forecast.stop()
             else:
                 if 115000 <= now_time <= 123000:
                     forecast.start()
+
+            # gosi 새 글 정해진 시간에 알림
+            if str(now_time) in time_list:
+                new_list = GetPost().new()
+                if new_list:
+                    await bot.get_channel(gosi_channel).send(embed=make_gosi_embed(new_list))
+
             await asyncio.sleep(1)
         except:
             print("on_ready has error")
@@ -41,40 +54,24 @@ async def cleaner(ctx):
 @bot.command(name='공지')
 async def notice(ctx):
     if str(ctx.channel) == 'gosi':
-        newsList = get_news_notice()
-        notice_embed = make_embed(newsList)
-        await ctx.channel.send(embed=notice_embed)
+        await ctx.channel.send(embed=make_gosi_embed(GetPost().notice()))
 
 
 @bot.command(name='새글')
 async def new(ctx):
     if str(ctx.channel) == 'gosi':
-        newsList = get_new_news()
-        if newsList:
-            new_embed = make_embed(newsList)
-            await ctx.channel.send(embed=new_embed)
+        new_list = GetPost().new()
+
+        if new_list:
+            await ctx.channel.send(embed=make_gosi_embed(new_list))
         else:
             await ctx.channel.send('새로운 글이 없습니다')
 
 
-# 새글 3시간마다 알림 -> 코드 수정 해야 함
-@tasks.loop(seconds=1)
-async def test():
-    if datetime.now().time().isoformat(timespec='seconds') in time_list:
-        get_new_post = get_new()
-
-        if get_new_post:
-            new_embed = make_embed(get_new_post)
-            await bot.get_channel(gosi_channel).send(embed=new_embed)
-
-
 @bot.command(name='7급')
-async def news7(ctx, limit):
+async def news7(ctx):
     if str(ctx.channel) == 'gosi':
-        newsList = get_news7(limit)
-        if newsList:
-            news7_embed = make_embed(newsList)
-            await ctx.channel.send(embed=news7_embed)
+        await ctx.channel.send(embed=make_gosi_embed(GetPost().grade_7()))
 
 
 # === weather 채널용 ===
@@ -104,10 +101,9 @@ async def walk_a_dog(ctx):
 # 예보 확인 후 기상이 안 좋을 것 같으면 알려줌
 @tasks.loop(seconds=1)
 async def forecast():
-    if 115000 <= convert_int_time(datetime.now()) <= 163000:
-        forecast_message = get_forecast()
-        if forecast_message:
-            await bot.get_channel(walk_channel).send(forecast_message)
+    forecast_message = get_forecast()
+    if forecast_message:
+        await bot.get_channel(weather_channel).send(forecast_message)
 
 
 bot.run(os.environ['TOKEN'])

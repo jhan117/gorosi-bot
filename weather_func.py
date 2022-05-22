@@ -1,32 +1,10 @@
-import requests
 from datetime import datetime, date
 import discord
 
+from common_func import *
+
 # 산책 채널
-walk_channel = 977417914548359228
-
-# OpenWeatherMap, 기상청 단기예보 조회 서비스, 한국환경공단 에어코리아 대기오염정보
-# API key
-current_key = "1329228661497ea2e257686e2ff7cef5"
-forecast_key = 'umso4gXSEBO4ctxQa9aUZtxV+0MTLfHuWdKnYGwC+e8F4BCDGaC01h6DZ6nL/3FkeV0ASk97hev+Qhgz9vjS3A=='
-dust_key = "umso4gXSEBO4ctxQa9aUZtxV+0MTLfHuWdKnYGwC+e8F4BCDGaC01h6DZ6nL/3FkeV0ASk97hev+Qhgz9vjS3A=="
-
-# URL
-current_url = "https://api.openweathermap.org/data/2.5/weather"
-forecast_url = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst"
-dust_url = "http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty"
-
-# 내 위치
-lat = "37.6378"
-lon = "126.6702"
-nx = "55"
-ny = "128"
-
-# parmas
-current_params = {'lat': lat, 'lon': lon,
-                  'appid': current_key, 'units': 'metric', 'lang': 'kr'}
-dust_params = {'serviceKey': dust_key,  'returnType': 'json',
-               'numOfRows': '1', 'stationName': '사우동', 'dataTerm': 'DAILY'}
+weather_channel = 977417914548359228
 
 
 # 나갈 수 있는 날씨
@@ -36,13 +14,9 @@ weather_main_list = ['Clear', 'Clouds', 'Snow']
 PTY_list = ["1", "2", "5", "6"]
 
 
-def request_get(url, params):
-    return requests.get(url, params=params).json()
-
-
 class OpenWeatherMap:
     def __init__(self):
-        self.response = request_get(current_url, current_params)
+        self.response = request_get(weather_url, weather_params).json()
 
     def weather(self):
         return self.response["weather"][0]
@@ -54,28 +28,15 @@ class OpenWeatherMap:
         return self.response["wind"]["speed"]
 
 
-class AnsiColors:
-    def template(self, contents):
-        return f"```ansi\n{contents}\n```"
-
-    def white(self):
-        return f"\u001b[{0};{37}m"
-
-    def red(self):
-        return f"\u001b[{0};{31}m"
-
-    def blue(self):
-        return f"\u001b[{0};{34}m"
-
-
-class WalkADog:
+class WalkADog(OpenWeatherMap):
     def __init__(self):
-        self.weather_api = OpenWeatherMap()
-        self.dust_api = request_get(dust_url, dust_params)["response"][
+        super().__init__()
+
+        self.dust_api = request_get(dust_url, dust_params).json()["response"][
             "body"]["items"][0]["khaiGrade"]
 
     def check_clothes(self):
-        feels_like = self.weather_api.main()["feels_like"]
+        feels_like = super().main()["feels_like"]
 
         if feels_like <= 5:
             clothes_message = f"체감 온도 {feels_like}, 패딩 추천합니다"
@@ -89,7 +50,7 @@ class WalkADog:
         return clothes_message
 
     def check_weather(self):
-        weather = self.weather_api.weather()
+        weather = super().weather()
 
         if not weather["main"] in weather_main_list:
             return f'현재 {weather["description"]}입니다. 밖을 보고 나가든가 하세요.'
@@ -99,7 +60,7 @@ class WalkADog:
             return f"미세먼지 개쩜"
 
     def check_wind(self):
-        wind = self.weather_api.wind()
+        wind = super().wind()
         if wind >= 4:
             return f"풍속 {wind}입니다. 바람에 죽지 마세요."
 
@@ -136,28 +97,21 @@ def make_weather_embed():
     return embed
 
 
-def convert_int(datetime_date):
-    return datetime_date.year * 10000 + datetime_date.month * 100 + datetime_date.day
-
-
-def convert_int_time(datetime_date):
-    return datetime_date.hour * 10000 + datetime_date.minute * 100 + datetime_date.second
-
-
+# 예보 확인
 def get_forecast():
     forecast_dict = {}
     forecast_message = ''
-    base_date = convert_int(datetime.now())
+    base_date = convert_to_int("date", datetime.now())
 
     if datetime.now().minute < 30:
         base_time = str(datetime.now().hour - 1) + '30'
     else:
-        base_time = str(convert_int_time(datetime.now()))[:-2]
+        base_time = str(convert_to_int("time", datetime.now()))[:-2]
 
     forecast_params = {'serviceKey': forecast_key, 'numOfRows': '60', 'dataType': 'JSON',
-                       'base_date': base_date, 'base_time': 1530, 'nx': nx, 'ny': ny}
+                       'base_date': base_date, 'base_time': base_time, 'nx': forecast_nx, 'ny': forecast_ny}
 
-    forecast_response = request_get(forecast_url, forecast_params)["response"][
+    forecast_response = request_get(forecast_url, forecast_params).json()["response"][
         "body"]["items"]["item"]
 
     for item in forecast_response:
