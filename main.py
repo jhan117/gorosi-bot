@@ -14,6 +14,7 @@ bot = commands.Bot(command_prefix='!',
 
 
 # 9, 12, 18시
+# 21(9), 3시
 time_list = ['090000', '120000', '180000']
 
 
@@ -36,6 +37,8 @@ async def on_ready():
 
             # gosi 새 글 정해진 시간에 알림
             if str(now_time) in time_list:
+                # 시간 테스트
+                print(f'내가 입력한 시간{time_list}, 컴터 시간{str(now_time)}')
                 new_list = GetPost().new()
                 if new_list:
                     await bot.get_channel(gosi_channel).send(embed=make_gosi_embed(new_list))
