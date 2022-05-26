@@ -57,8 +57,7 @@ class WalkADog(OpenWeatherMap):
             return f'현재 {weather["description"]}입니다. 밖을 보고 나가든가 하세요.'
 
     def check_dust(self):
-        print(f"값 : {self.dust_api}, 타입 : {type(self.dust_api)}")
-        if self.dust_api >= '3':
+        if int(self.dust_api) >= 3:
             return f"미세먼지 개쩜"
 
     def check_wind(self):
@@ -73,6 +72,8 @@ def make_weather_embed():
     colors = AnsiColors()
     white = colors.white()
 
+    now = datetime.now(timezone('Asia/Seoul'))
+
     # 내용물
     desc = f'{white}{API.weather()["description"]}'
 
@@ -84,7 +85,7 @@ def make_weather_embed():
     wind = f'{white}{API.wind()}'
 
     # 임베드
-    embed = discord.Embed(title=f"{date.today(timezone('Asia/Seoul'))}의 날씨")
+    embed = discord.Embed(title=f"{now.strftime('%Y-%m-%d')}의 날씨")
 
     embed.add_field(name="날씨", value=colors.template(desc), inline=False)
     embed.add_field(name="기온", value=colors.template(temp))
@@ -94,8 +95,7 @@ def make_weather_embed():
         name="최고 기온", value=colors.template(temp_max))
     embed.add_field(name="풍속", value=colors.template(wind), inline=False)
 
-    embed.set_footer(text=datetime.now(
-        timezone('Asia/Seoul')).replace(microsecond=0))
+    embed.set_footer(text=now.replace(microsecond=0))
 
     return embed
 
