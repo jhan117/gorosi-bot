@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 import os
 
 from datetime import datetime
+from pytz import timezone
 import asyncio
 
 from common_func import *
@@ -14,7 +15,6 @@ bot = commands.Bot(command_prefix='!',
 
 
 # 9, 12, 18시
-# 21(9), 3시
 time_list = ['090000', '120000', '180000']
 
 
@@ -25,7 +25,8 @@ async def on_ready():
 
     while True:
         try:
-            now_time = convert_to_int("time", datetime.now())
+            now_time = convert_to_int(
+                "time", datetime.now(timezone('Asia/Seoul')))
 
             # 지정된 시간에 실행
             if forecast.is_running() == True:
