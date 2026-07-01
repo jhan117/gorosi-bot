@@ -5,6 +5,7 @@ class BaseCrawler(abc.ABC):
     def __init__(self, url):
         self.url = url
         self.session = requests.Session()
+        self.timeout = 15
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                           'AppleWebKit/537.36 (KHTML, like Gecko) '

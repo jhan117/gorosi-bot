@@ -1,6 +1,7 @@
 import asyncio
+import traceback
 import discord
-from src.config import DISCORD_TOKEN, BOARDS, PORTAL_ID, PORTAL_PW
+from src.config import DISCORD_TOKEN, BOARDS, PORTAL_ID, PORTAL_PW, ADMIN_CHANNEL_ID
 from src.crawlers.factory import get_crawler
 from src.config import load_data, save_data
 
@@ -18,6 +19,12 @@ async def run_bot():
         
         state_data = load_data()
         
+        admin_channel = None
+        if ADMIN_CHANNEL_ID:
+            admin_channel = client.get_channel(ADMIN_CHANNEL_ID)
+            if not admin_channel:
+                print(f"[Admin] Warning: Admin channel {ADMIN_CHANNEL_ID} not found.")
+
         for board in BOARDS:
             board_name = board['name']
             crawler_type = board['crawler_type']
@@ -38,7 +45,25 @@ async def run_bot():
                 # Pass credentials if needed (e.g. internship)
                 notices = crawler.get_notices(portal_id=PORTAL_ID, portal_pw=PORTAL_PW)
             except Exception as e:
-                print(f"[{board_name}] Error fetching notices: {e}")
+                err_msg = f"[{board_name}] Error fetching notices: {e}"
+                print(err_msg)
+                traceback.print_exc()
+                
+                # Send error notification to admin channel if set
+                if admin_channel:
+                    try:
+                        embed = discord.Embed(
+                            title=f"❌ 크롤러 에러 발생 - {board_name}",
+                            description=f"**에러 메시지**: `{e}`\n**대상 URL**: {url}",
+                            color=0xFF0000
+                        )
+                        tb_str = traceback.format_exc()
+                        if len(tb_str) > 1000:
+                            tb_str = tb_str[:1000] + "\n... (truncated)"
+                        embed.add_field(name="Traceback", value=f"```python\n{tb_str}\n```", inline=False)
+                        await admin_channel.send(embed=embed)
+                    except Exception as send_err:
+                        print(f"[Admin] Failed to send error alert: {send_err}")
                 continue
 
             if not notices:
@@ -64,6 +89,7 @@ async def run_bot():
             new_notices.sort(key=lambda x: x['id'])
             print(f"[{board_name}] Found {len(new_notices)} new notices.")
 
+            success_ids = []
             for notice in new_notices:
                 embed = discord.Embed(
                     title=notice['title'],
@@ -90,15 +116,17 @@ async def run_bot():
                 try:
                     await channel.send(embed=embed)
                     print(f"[{board_name}] Sent notice {notice['id']}")
+                    success_ids.append(notice['id'])
                 except Exception as e:
                     print(f"[{board_name}] Failed to send notice {notice['id']}: {e}")
                     
                 await asyncio.sleep(1)
                 
-            max_id = max(n['id'] for n in new_notices)
-            state_data[board_name] = max_id
-            save_data(state_data)
-            print(f"[{board_name}] Updated last_bidx to {max_id}")
+            if success_ids:
+                max_success_id = max(success_ids)
+                state_data[board_name] = max(last_bidx, max_success_id)
+                save_data(state_data)
+                print(f"[{board_name}] Updated last_bidx to {state_data[board_name]}")
             
         await client.close()
 

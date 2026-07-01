@@ -5,7 +5,7 @@ from src.crawlers.base import BaseCrawler
 
 class HousingCrawler(BaseCrawler):
     def get_notices(self, **kwargs) -> list[dict]:
-        response = self.session.get(self.url, headers=self.headers)
+        response = self.session.get(self.url, headers=self.headers, timeout=self.timeout)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         
@@ -14,6 +14,9 @@ class HousingCrawler(BaseCrawler):
         
         # 생활관은 a 태그에 bidx=가 포함된 요소 추출
         for a in soup.find_all('a', href=lambda h: h and 'bidx=' in h):
+            if a.find_parent(class_='thumb'):
+                continue
+                
             href = a.get('href', '')
             parsed = urllib.parse.urlparse(href)
             params = urllib.parse.parse_qs(parsed.query)
@@ -29,16 +32,29 @@ class HousingCrawler(BaseCrawler):
             seen.add(post_id)
             
             title = a.text.strip()
+            
+            if title.upper() == 'VIEW':
+                parent_box = a.find_parent('div', class_='box')
+                if parent_box:
+                    b_tag = parent_box.find('b')
+                    if b_tag:
+                        title = b_tag.text.strip()
+            
             if not title:
                 title = "제목 없음"
                 
+            title = re.sub(r'^No\.0\s+', '[공지] ', title)
+            title = re.sub(r'^No\.\d+\s+', '', title)
+            
             link = urllib.parse.urljoin(self.url, href)
             
             container = a.find_parent('div', class_='list')
             author = "생활관"
             date = ""
             if container:
-                m = re.search(r'(\d{4}-\d{2}-\d{2})', container.text)
+                date_div = container.find(class_='date')
+                target_text = date_div.text if date_div else container.text
+                m = re.search(r'(\d{4}-\d{2}-\d{2})', target_text)
                 if m:
                     date = m.group(1)
             

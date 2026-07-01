@@ -4,7 +4,7 @@ from src.crawlers.base import BaseCrawler
 
 class SeoultechCrawler(BaseCrawler):
     def get_notices(self, **kwargs) -> list[dict]:
-        response = self.session.get(self.url, headers=self.headers)
+        response = self.session.get(self.url, headers=self.headers, timeout=self.timeout)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         

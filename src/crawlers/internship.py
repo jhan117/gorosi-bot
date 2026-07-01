@@ -25,10 +25,10 @@ class InternshipCrawler(BaseCrawler):
             "pw": portal_pw
         }
         
-        res = self.session.post(self.login_url, data=login_data, headers=self.headers)
+        res = self.session.post(self.login_url, data=login_data, headers=self.headers, timeout=self.timeout)
         res.raise_for_status()
         
-        response = self.session.get(self.url, headers=self.headers)
+        response = self.session.get(self.url, headers=self.headers, timeout=self.timeout)
         response.raise_for_status()
         
         if "로그인이 필요합니다" in response.text:

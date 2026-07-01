@@ -1,40 +1,56 @@
 import os
 import json
+# pyrefly: ignore [missing-import]
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # 디스코드 봇 토큰 및 인증 정보
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 PORTAL_ID = os.getenv('PORTAL_ID')
 PORTAL_PW = os.getenv('PORTAL_PW')
+ADMIN_CHANNEL_ID = 1521769149229957202
 
-# 프로젝트 루트 디렉토리 계산 (src/ 의 상위 폴더)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_FILE = os.path.join(BASE_DIR, 'data', 'bidx.json')
 
 # 게시판 설정
 BOARDS = [
     {
-        "name": "서울과기대 일반공지",
+        "name": "서울과기대 일반 공지",
         "crawler_type": "seoultech",
         "url": "https://www.seoultech.ac.kr/service/info/notice/",
-        "channel_id": 1332717887372333069
+        "channel_id": 1521769621168853144
     },
     {
-        "name": "서울과기대 학사공지",
+        "name": "서울과기대 학사 공지",
         "crawler_type": "seoultech",
         "url": "https://www.seoultech.ac.kr/service/info/matters/",
-        "channel_id": 1332717887372333069
+        "channel_id": 1521772768654266520
     },
     {
-        "name": "서울과기대 장학공지",
+        "name": "서울과기대 장학 공지",
         "crawler_type": "seoultech",
         "url": "https://www.seoultech.ac.kr/service/info/janghak/",
-        "channel_id": 1332717887372333069
+        "channel_id": 1521772796542451744
+    },
+    {
+        "name": "컴공 학부 공지",
+        "crawler_type": "seoultech",
+        "url": "https://computer.seoultech.ac.kr/info/notice",
+        "channel_id": 1521774310463901796
     },
     {
         "name": "생활관 공지사항",
         "crawler_type": "housing",
         "url": "https://housing.seoultech.ac.kr/community/notice?boardFilter=58605",
-        "channel_id": 1332717887372333069
+        "channel_id": 1521774721698369616
+    },
+    {
+        "name": "생활관생 모집",
+        "crawler_type": "housing",
+        "url": "https://housing.seoultech.ac.kr/community/applicaion",
+        "channel_id": 1521775045385654402
     },
     {
         "name": "현장실습(인턴십) 공지",
