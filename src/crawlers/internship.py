@@ -57,6 +57,7 @@ class InternshipCrawler(BaseCrawler):
                 company_name = company_a.text.strip()
                 job_title = job_a.text.strip()
                 major = td_list[3].text.strip()
+                recruit_count = td_list[4].text.strip()
                 work_period = td_list[6].text.strip().replace('\n', ' ')
                 recruit_period = td_list[7].text.strip().replace('\n', ' ')
             elif len(td_list) >= 12:
@@ -68,6 +69,7 @@ class InternshipCrawler(BaseCrawler):
                 company_name = f"{td_list[1].text.strip()} {company_a.text.strip()}"
                 job_title = job_a.text.strip()
                 major = td_list[5].text.strip()
+                recruit_count = td_list[6].text.strip()
                 work_period = td_list[8].text.strip().replace('\n', ' ')
                 recruit_period = td_list[9].text.strip().replace('\n', ' ')
             else:
@@ -81,9 +83,8 @@ class InternshipCrawler(BaseCrawler):
                 'id': post_id,
                 'title': title[:100],
                 'link': link,
-                'author': "인턴십",
-                'date': "",
                 'major': major,
+                'recruit_count': recruit_count,
                 'work_period': work_period,
                 'recruit_period': recruit_period
             })

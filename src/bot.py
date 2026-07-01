@@ -72,12 +72,15 @@ async def run_bot():
                 )
                 embed.set_author(name=f"[{board_name}] 새 공지", icon_url="https://www.seoultech.ac.kr/common/images/favicon.ico")
                 
-                embed.add_field(name="작성자", value=notice['author'], inline=True)
+                if notice.get('author'):
+                    embed.add_field(name="작성자", value=notice['author'], inline=True)
                 if notice.get('date'):
                     embed.add_field(name="작성일", value=notice['date'], inline=True)
                 
                 if notice.get('major'):
                     embed.add_field(name="전공분야", value=notice['major'], inline=False)
+                if notice.get('recruit_count'):
+                    embed.add_field(name="모집인원", value=f"{notice['recruit_count']}명", inline=True)
                 if notice.get('work_period'):
                     embed.add_field(name="근무기간", value=notice['work_period'], inline=True)
                 if notice.get('recruit_period'):
