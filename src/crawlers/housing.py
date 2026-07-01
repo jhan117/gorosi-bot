@@ -1,3 +1,4 @@
+import re
 import urllib.parse
 from bs4 import BeautifulSoup
 from src.crawlers.base import BaseCrawler
@@ -33,16 +34,13 @@ class HousingCrawler(BaseCrawler):
                 
             link = urllib.parse.urljoin(self.url, href)
             
-            # 공지 작성자나 날짜는 부모 tr 등을 따라가야 하지만, 
-            # 기존 crawler.py와 동일하게 처리
-            tr = a.find_parent('tr')
+            container = a.find_parent('div', class_='list')
             author = "생활관"
             date = ""
-            if tr:
-                tds = tr.find_all('td')
-                if len(tds) >= 5:
-                    author = tds[3].text.strip()
-                    date = tds[4].text.strip()
+            if container:
+                m = re.search(r'(\d{4}-\d{2}-\d{2})', container.text)
+                if m:
+                    date = m.group(1)
             
             notices.append({
                 'id': post_id,

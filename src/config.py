@@ -27,13 +27,13 @@ BOARDS = [
     {
         "name": "서울과기대 장학공지",
         "crawler_type": "seoultech",
-        "url": "https://www.seoultech.ac.kr/service/info/scholarship/",
+        "url": "https://www.seoultech.ac.kr/service/info/janghak/",
         "channel_id": 1332717887372333069
     },
     {
         "name": "생활관 공지사항",
         "crawler_type": "housing",
-        "url": "https://dormitory.seoultech.ac.kr/b/notice",
+        "url": "https://housing.seoultech.ac.kr/community/notice?boardFilter=58605",
         "channel_id": 1332717887372333069
     },
     {
