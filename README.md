@@ -27,7 +27,7 @@
 - `.github/workflows/gorosi_bot_v2.yml`: 외부 크론 서비스로부터 요청을 받아 봇을 구동하며 빌드 및 상태 커밋을 수행하는 워크플로우
 
 ## 운영 및 실행 환경
-- **호스팅**: GitHub Actions (Private Repository)
+- **호스팅**: GitHub Actions (Public Repository)
 - **스케줄러**: [cron-job.org](https://cron-job.org/) (외부 무료 크론 서비스)
 - **연동 방식**: GitHub Personal Access Token (Fine-grained PAT)을 활용하여 매시간 API(`workflow_dispatch`)를 호출해 강제 기동하는 방식
 - **외부 크론 도입 이유**:
