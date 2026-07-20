@@ -47,12 +47,6 @@ BOARDS = [
         "channel_id": 1521774721698369616
     },
     {
-        "name": "생활관생 모집",
-        "crawler_type": "housing",
-        "url": "https://housing.seoultech.ac.kr/community/applicaion",
-        "channel_id": 1521775045385654402
-    },
-    {
         "name": "현장실습(인턴십) 공지",
         "crawler_type": "internship",
         "url": "https://internship.seoultech.ac.kr/mypage/recruit?list=1",

@@ -31,13 +31,18 @@ class InternshipCrawler(BaseCrawler):
         response = self.session.get(self.url, headers=self.headers, timeout=self.timeout)
         response.raise_for_status()
         
-        if "로그인이 필요합니다" in response.text:
-            raise ValueError("Login failed or session expired.")
+        # 좀 더 포괄적인 로그인 실패 체크
+        error_keywords = ["로그인이 필요합니다", "비밀번호", "일치하지", "로그인 후 이용"]
+        if any(keyword in response.text for keyword in error_keywords):
+            # HTML 앞부분 일부를 포함해 에러 메시지 생성 (디버깅용)
+            snippet = response.text[:300].replace('\n', ' ')
+            raise ValueError(f"Login failed or session expired. Check PORTAL_ID/PW. Snippet: {snippet}")
             
         soup = BeautifulSoup(response.text, 'html.parser')
         notices = []
+        tr_elements = soup.find_all('tr')
         
-        for tr in soup.find_all('tr'):
+        for tr in tr_elements:
             td_list = tr.find_all('td')
             if not td_list or len(td_list) < 9:
                 continue
@@ -88,5 +93,9 @@ class InternshipCrawler(BaseCrawler):
                 'work_period': work_period,
                 'recruit_period': recruit_period
             })
+            
+        # HTML 구조 변경으로 인한 '조용한 파싱 실패' 감지
+        if len(tr_elements) > 5 and len(notices) == 0:
+            raise ValueError(f"Parsing error: HTML 구조가 변경된 것 같습니다. 테이블 행(tr)이 {len(tr_elements)}개 발견되었으나 파싱된 공지가 0개입니다.")
             
         return notices

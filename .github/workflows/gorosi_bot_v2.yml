@@ -6,6 +6,7 @@ on:
 jobs:
   check-and-notify:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     
     # 레포지토리 자동 커밋을 위한 쓰기 권한 명시
     permissions:
