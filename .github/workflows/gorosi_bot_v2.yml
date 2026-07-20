@@ -3,11 +3,6 @@ name: 고로시 봇 v2
 on:
   workflow_dispatch:
 
-# 동일 워크플로우 동시 실행 제어 (커밋 충돌 방지)
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   check-and-notify:
     runs-on: ubuntu-latest
