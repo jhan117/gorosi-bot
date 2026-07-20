@@ -43,7 +43,7 @@ BOARDS = [
     {
         "name": "생활관 공지사항",
         "crawler_type": "housing",
-        "url": "https://housing.seoultech.ac.kr/community/notice?boardFilter=58605",
+        "url": "https://housing.seoultech.ac.kr/community/notice?boardFilter=DOMESTIC",
         "channel_id": 1521774721698369616
     },
     {
