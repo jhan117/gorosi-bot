@@ -21,3 +21,8 @@ venv.bak/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Logs
+logs/
+*.log
+

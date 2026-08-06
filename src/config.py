@@ -5,16 +5,26 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# 디스코드 봇 토큰 및 인증 정보
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 PORTAL_ID = os.getenv('PORTAL_ID')
 PORTAL_PW = os.getenv('PORTAL_PW')
 ADMIN_CHANNEL_ID = 1521769149229957202
 
+# 인턴십 공지 필터링 전공 키워드 목록
+TARGET_MAJORS = ["컴퓨터", "소프트웨어", "인공지능", "전공무관", "무관", "전체", "제한없음"]
+
+def validate_env() -> bool:
+
+    """필수 환경변수 사전 유효성 검사"""
+    missing = []
+    if not DISCORD_TOKEN: missing.append('DISCORD_TOKEN')
+    if not PORTAL_ID: missing.append('PORTAL_ID')
+    if not PORTAL_PW: missing.append('PORTAL_PW')
+    return len(missing) == 0
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_FILE = os.path.join(BASE_DIR, 'data', 'bidx.json')
 
-# 게시판 설정
 BOARDS = [
     {
         "name": "서울과기대 일반 공지",
@@ -57,7 +67,7 @@ BOARDS = [
         "crawler_type": "internship",
         "url": "https://internship.seoultech.ac.kr/mypage/recruit?list=2",
         "channel_id": 1521785807810334842
-    }
+    },
 ]
 
 def load_data():
@@ -73,3 +83,4 @@ def save_data(data):
     os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
+
