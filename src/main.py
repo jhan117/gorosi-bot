@@ -24,8 +24,8 @@ def send_critical_alert(error_title, error_message):
     }
     data = {
         "embeds": [{
-            "title": f"🚨 치명적 오류 발생: {error_title}",
-            "description": f"**내용**:\n```python\n{error_message}\n```",
+            "title": f"[Critical] Error: {error_title}",
+            "description": f"**Details**:\n```python\n{error_message}\n```",
             "color": 0xFF0000
         }]
     }
@@ -33,22 +33,22 @@ def send_critical_alert(error_title, error_message):
     try:
         urllib.request.urlopen(req, timeout=5)
     except Exception as e:
-        logger.error(f"Failed to send critical alert: {e}")
+        logger.error(f"[Critical] Failed to send alert: {e}")
 
 if __name__ == "__main__":
     try:
         asyncio.run(asyncio.wait_for(run_bot(), timeout=120))
     except asyncio.TimeoutError:
-        msg = "봇 실행 시간이 120초를 초과하여 강제 종료되었습니다. 무한 루프나 네트워크 응답 지연을 확인하세요."
+        msg = "Bot execution timed out (>120s)."
         logger.error(msg)
-        send_critical_alert("타임아웃(Timeout) 강제 종료", msg)
+        send_critical_alert("Timeout Error", msg)
         sys.exit(0)
     except KeyboardInterrupt:
         logger.info("Bot stopped by user.")
     except Exception as e:
         msg = traceback.format_exc()
-        logger.critical(f"Bot encountered a critical error:\n{msg}")
-        send_critical_alert("비정상 강제 종료", msg[:1500])
+        logger.critical(f"[Critical] Unhandled error:\n{msg}")
+        send_critical_alert("Unhandled Exception", msg[:1500])
         sys.exit(1)
 
 

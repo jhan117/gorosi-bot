@@ -19,8 +19,6 @@ def create_notice_embed(board_name: str, notice: dict) -> discord.Embed:
         name=f"[{board_name}] 새 공지",
         icon_url="https://www.seoultech.ac.kr/site/www/images/intro/img_ui05.gif"
     )
-
-
     
     if notice.get('author'):
         embed.add_field(name="작성자", value=notice['author'], inline=True)
@@ -46,8 +44,8 @@ async def send_admin_error_alert(admin_channel, board_name: str, url: str, error
         return
     try:
         embed = discord.Embed(
-            title=f"❌ 크롤러 에러 발생 - {board_name}",
-            description=f"**에러 메시지**: `{error}`\n**대상 URL**: {url}",
+            title=f"[Error] Crawler Exception - {board_name}",
+            description=f"**Error**: `{error}`\n**URL**: {url}",
             color=0xFF0000
         )
         tb_str = traceback.format_exc()
@@ -69,7 +67,7 @@ async def process_board(board: dict, state_data: dict, client: discord.Client, a
     channel_id = int(test_channel_id) if test_channel_id else board.get('channel_id')
 
     if not channel_id:
-        logger.warning(f"[{board_name}] Channel ID is missing in config.")
+        logger.warning(f"[{board_name}] Channel ID missing.")
         return
         
     channel = client.get_channel(channel_id)
@@ -83,7 +81,7 @@ async def process_board(board: dict, state_data: dict, client: discord.Client, a
         crawler = get_crawler(crawler_type, url)
         notices = crawler.get_notices(portal_id=PORTAL_ID, portal_pw=PORTAL_PW)
     except Exception as e:
-        logger.error(f"[{board_name}] Error fetching notices: {e}")
+        logger.error(f"[{board_name}] Fetch failed: {e}")
         await send_admin_error_alert(admin_channel, board_name, url, e)
         return
 
@@ -104,8 +102,12 @@ async def process_board(board: dict, state_data: dict, client: discord.Client, a
             max_id = max(n['id'] for n in notices)
             state_data[board_name] = max_id
             
-        save_data(state_data)
-        logger.info(f"[{board_name}] First run sync done without sending alerts.")
+        if not test_channel_id:
+            save_data(state_data)
+        else:
+            logger.info(f"[{board_name}] [Test] Skipped saving initial state.")
+            
+        logger.info(f"[{board_name}] Initial sync complete.")
         return
 
     # 4. 신규 공지 필터링
@@ -121,17 +123,17 @@ async def process_board(board: dict, state_data: dict, client: discord.Client, a
 
     # 5. 신규 공지 전송
     new_notices.sort(key=lambda x: x['id'])
-    logger.info(f"[{board_name}] Found {len(new_notices)} new notice(s). Processing...")
+    logger.info(f"[{board_name}] Found {len(new_notices)} new notice(s).")
 
     success_ids = []
     for notice in new_notices:
         embed = create_notice_embed(board_name, notice)
         try:
             await channel.send(embed=embed)
-            logger.info(f"[{board_name}] Sent notice {notice['id']}: {notice['title']}")
+            logger.info(f"[{board_name}] Sent notice {notice['id']}")
             success_ids.append(notice['id'])
         except Exception as e:
-            logger.error(f"[{board_name}] Failed to send notice {notice['id']}: {e}")
+            logger.error(f"[{board_name}] Send failed ({notice['id']}): {e}")
             
         await asyncio.sleep(1)
         
@@ -146,8 +148,11 @@ async def process_board(board: dict, state_data: dict, client: discord.Client, a
             last_id = saved_state if isinstance(saved_state, int) else max(saved_state)
             state_data[board_name] = max(last_id, max_success_id)
             
-        save_data(state_data)
-        logger.info(f"[{board_name}] Updated state_data to: {state_data[board_name]}")
+        if not test_channel_id:
+            save_data(state_data)
+            logger.info(f"[{board_name}] State updated: {state_data[board_name]}")
+        else:
+            logger.info(f"[{board_name}] [Test] Skipped saving state.")
 
 
 async def run_bot():
@@ -158,7 +163,7 @@ async def run_bot():
 
     test_channel_id = os.getenv('TEST_CHANNEL_ID')
     if test_channel_id:
-        logger.info(f"🧪 [TEST MODE ENABLED] TEST_CHANNEL_ID({test_channel_id}) 감지됨! 모든 공지가 테스트 채널로 우회됩니다.")
+        logger.info(f"[Test] Test mode enabled (Channel: {test_channel_id})")
 
     intents = discord.Intents.default()
     client = discord.Client(intents=intents)
@@ -171,7 +176,7 @@ async def run_bot():
             state_data = load_data()
             admin_channel = client.get_channel(ADMIN_CHANNEL_ID) if ADMIN_CHANNEL_ID else None
             if ADMIN_CHANNEL_ID and not admin_channel:
-                logger.warning(f"[Admin] Warning: Admin channel {ADMIN_CHANNEL_ID} not found.")
+                logger.warning(f"[Admin] Admin channel {ADMIN_CHANNEL_ID} not found.")
 
             for board in BOARDS:
                 await process_board(board, state_data, client, admin_channel)
@@ -182,6 +187,6 @@ async def run_bot():
     try:
         await client.start(DISCORD_TOKEN)
     except Exception as e:
-        logger.error(f"Error starting discord client: {e}")
+        logger.error(f"[Bot] Startup failed: {e}")
 
 

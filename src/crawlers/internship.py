@@ -65,16 +65,19 @@ class InternshipCrawler(BaseCrawler):
         # 4. 공지사항 테이블 파싱
         soup = BeautifulSoup(response.text, 'html.parser')
         tr_elements = soup.find_all('tr')
-        notices = []
+        raw_notices = []
         
         for tr in tr_elements:
             notice = self._parse_row(tr)
             if notice:
-                notices.append(notice)
+                raw_notices.append(notice)
             
-        if len(tr_elements) > 5 and len(notices) == 0:
+        if len(tr_elements) > 5 and len(raw_notices) == 0:
             raise ValueError(f"Parsing error: HTML 구조가 변경된 것 같습니다. 테이블 행(tr)이 {len(tr_elements)}개 발견되었으나 파싱된 공지가 0개입니다.")
             
+        # 타과 전용 공지 필터링 (컴퓨터계열/전공무관만 수신)
+        notices = [n for n in raw_notices if self._is_target_major(n['major'])]
+        
         return notices
 
     def _login(self, portal_id: str, portal_pw: str):
@@ -149,10 +152,6 @@ class InternshipCrawler(BaseCrawler):
             work_period = td_list[8].text.strip().replace('\n', ' ')
             recruit_period = td_list[9].text.strip().replace('\n', ' ')
         else:
-            return None
-
-        # 타과 전용 공지 필터링 (컴퓨터계열/전공무관만 수신)
-        if not self._is_target_major(major):
             return None
 
         post_id = self._extract_post_id(company_a)
