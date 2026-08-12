@@ -166,7 +166,7 @@ class InternshipCrawler(BaseCrawler):
             'id': post_id,
             'title': title[:100],
             'link': link,
-            'major': major,
+            'major': major if major else '미기재',
             'recruit_count': recruit_count,
             'work_period': work_period,
             'recruit_period': recruit_period

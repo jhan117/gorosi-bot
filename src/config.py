@@ -11,7 +11,7 @@ PORTAL_PW = os.getenv('PORTAL_PW')
 ADMIN_CHANNEL_ID = 1521769149229957202
 
 # 인턴십 공지 필터링 전공 키워드 목록
-TARGET_MAJORS = ["컴퓨터", "소프트웨어", "인공지능", "전공무관", "무관", "전체", "제한없음"]
+TARGET_MAJORS = ["컴퓨터", "소프트웨어", "인공지능", "전공무관", "무관", "전체", "제한없음", "관련 학과"]
 
 def validate_env() -> bool:
 
