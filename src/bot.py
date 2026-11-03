@@ -43,14 +43,15 @@ async def send_admin_error_alert(admin_channel, board_name: str, url: str, error
     if not admin_channel:
         return
     try:
+        max_length = 1000
         embed = discord.Embed(
             title=f"[Error] Crawler Exception - {board_name}",
             description=f"**Error**: `{error}`\n**URL**: {url}",
             color=0xFF0000
         )
         tb_str = traceback.format_exc()
-        if len(tb_str) > 1000:
-            tb_str = tb_str[:1000] + "\n... (truncated)"
+        if len(tb_str) > max_length:
+            tb_str = tb_str[:max_length - 20] + "\n... (truncated)"
         embed.add_field(name="Traceback", value=f"```python\n{tb_str}\n```", inline=False)
         await admin_channel.send(embed=embed)
     except Exception as send_err:

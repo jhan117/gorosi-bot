@@ -26,3 +26,4 @@ Thumbs.db
 logs/
 *.log
 
+data/combined_ca.crt
